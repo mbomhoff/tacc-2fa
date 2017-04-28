@@ -60,7 +60,7 @@ sub init {
 
     my $conf = { username => $username, password => $password, twilioID => $twilioID, twilioPass => $twilioPass };
     store($conf, $configFilename);
-    chmod(0700, $configFilename);
+    chmod(0600, $configFilename);
     return $conf;
 }
 
