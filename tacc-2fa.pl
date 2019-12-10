@@ -11,7 +11,7 @@ use Storable;
 my $configFilename = "tacc2fa.cfg";
 
 my $hostname = shift;
-my $remoteCommand = shift;
+my $remoteCommand = join(" ", @ARGV);
 unless ($hostname && $remoteCommand) {
     usage();
     exit;
@@ -25,7 +25,8 @@ else {
     $conf = init();
 }
 
-my $command = "ssh " . $conf->{username} . "\@" . $hostname . " " . $remoteCommand;
+my $command = "ssh " . ( $conf->{username} ?  $conf->{username} . "@" : "") . $hostname . " " . $remoteCommand;
+print $command, "\n";
 my $exp = Expect->spawn($command)
     or die "Cannot spawn $command: $!\n";
 
