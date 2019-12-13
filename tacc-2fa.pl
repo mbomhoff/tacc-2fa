@@ -3,12 +3,11 @@
 use warnings;
 use strict;
 
-use Switch;
 use LWP::UserAgent;
 use Expect;
 use Storable;
 
-my $configFilename = "tacc2fa.cfg";
+my $configFilename = "tacc-2fa.cfg";
 
 my $hostname = shift;
 my $remoteCommand = join(" ", @ARGV);
@@ -26,11 +25,11 @@ else {
 }
 
 my $command = "ssh " . ( $conf->{username} ?  $conf->{username} . "@" : "") . $hostname . " " . $remoteCommand;
-print $command, "\n";
+# print $command, "\n";
 my $exp = Expect->spawn($command)
     or die "Cannot spawn $command: $!\n";
 
-sleep 3;
+sleep 5;
 
 my $twilioUrl = "https://api.twilio.com/2010-04-01/Accounts/" . $conf->{twilioID} . "/SMS/Messages.csv?PageSize=1";
 my $ua = new LWP::UserAgent;
@@ -39,14 +38,16 @@ $request_ua->authorization_basic( $conf->{twilioID}, $conf->{twilioPass} );
 my $response = $ua->request($request_ua);
 my $entries = $response->content;
 
-my ($code) = $entries =~ /This is an automated message from TACC\. Your 2\-factor code is (\d+)/s;
+# print "$entries\n";
+my ($code) = $entries =~ /Your 2\-factor code is (\d+)/s;
+# print "code: $code\n";
 
-$exp->expect(10, '-ex', 'TACC Token Code:', sub { sleep 2; $exp->send("$code\n"); });
+$exp->expect(10, '-ex', 'TACC Token Code:', sub { sleep 5; $exp->send("$code\n"); });
 $exp->soft_close();
 
 exit;
 
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------
 
 sub init {
     print "Enter TACC username: ";
